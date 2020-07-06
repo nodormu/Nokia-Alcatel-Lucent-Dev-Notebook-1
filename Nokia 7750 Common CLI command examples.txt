@@ -1,0 +1,496 @@
+Nokia 7x50 Common CLI examples:
+
+URL references:
+https://documentation.nokia.com/html/0_add-h-f/93-0072-HTML/7750_SR_OS_Interfaces_Guide/Interface-CLI-Show-CLI.html
+https://documentation.nokia.com/html/0_add-h-f/93-0070-10-01/7750_SR_OS_System_Basics_Guide/Root-CLI.html
+
+
+Note 1: As in linux, you can just hit tab (and/or use ? as with Cisco) to get the options available for most nokia/alcatel lucent devices CLI option syntax, which is not restricted to, but includes names/labels as strings with quotes.
+Note 2: as in most many object oriented programming languages and associated markup languages, types are referenced by their labels/names listed as strings in quotes, i.e.:  "iom3-xp-b". Command syntax is not in quotes.
+Note 3: This is example output from a Nokia 7750 service router
+Note 4: Underscores are used in places at times vs parenthesis for strings depening upon the command.
+Note 5: info = recent CLI history for a specific config, interface, port or whatever terminal mode you happen to be in.
+Note 6: There is a Cisco 3725 router mentioned, but the text files in this Dev notebook are strictly for the Nokia devices. Please see the Cisco Dev Notebook for Cisco CLI examples in my github repo.
+Note 7: The following commands are great reviewing historic elements and information:  
+info
+info detail
+history
+Note 8: when in interface configuration prompt ...>if$ or ...>if#, you can type info which would be the equivalent in Cisco root configure terminal prompt of:  show run interface <interface name> 
+Note 9: Try for various commands as an alternative depending on your code version, i.e.:  `show card state` instead of `show card`
+Note 10: The output examples may be slightly different than what your particular version of code shows.
+Note 11: `admin display-config` is the same as `show run` in Cisco
+
+----------------------------------------------------------
+
+Contents:
+1) Set system name
+2) provision and verify additional cards and ports (example output from 7750)
+3) Configure Router Interfaces and set/verify static routes (example output from 7750)
+
+----------------------------------------------------------
+
+1) Set system name
+
+*A:vRR#configure system name 7750SR_1
+*A:7750SR_1#
+
+
+
+2) provision and verify additional cards and ports (example output from 7750)
+
+*A:7750SR_1#show card
+
+================================================================================
+Card Summary
+================================================================================
+Slot	Provisioned Type			Admin Operational	Comments
+1	(not provisioned)			up    unprovisioned	
+		iom3-xp-b
+A	sfm4-12					up    up/active
+B	sfm4-12					up    down/standby
+		(not equipped)
+================================================================================
+*A:7750SR_1# configure 
+*A:7750SR_1>config# card 1 
+*A:7750SR_1>config>card# card-type "iom3-xp-b"
+*A:7750SR_1>config>card# exit
+*A:7750SR_1# show card
+
+================================================================================
+Card Summary
+================================================================================
+Slot	Provisioned Type			Admin Operational	Comments
+1	iom3-xp-b				up    up	
+A	sfm4-12					up    up/active
+B	sfm4-12					up    down/standby
+================================================================================
+*A:7750SR_1#show port
+
+================================================================================
+Ports on Slot A
+================================================================================
+Port	Admin Link  Port   Cfg  Oper  LAG/ Port Port Port       C/QS/S/XFP
+Id	State       State  MTU  MTU   Bndl Mode Encp Encp       MDIMDX
+--------------------------------------------------------------------------------
+A/1	Up    Yes   Up     1514 1514     - netw null faste      MDI
+
+================================================================================
+Ports on Slot B
+================================================================================
+Port	Admin Link  Port   Cfg  Oper  LAG/ Port Port Port       C/QS/S/XFP
+Id	State       State  MTU  MTU   Bndl Mode Encp Encp       MDIMDX
+--------------------------------------------------------------------------------
+B/1	Up    Yes   Ghost  1514 1514     - netw null faste      
+================================================================================
+*A:7750SR_1## configure card 1 mda 1 mda-type "m5-1-gb-sfp-b"
+*A:7750SR_1## show port
+
+================================================================================
+Ports on Slot 1
+================================================================================
+Port	Admin Link  Port   Cfg  Oper  LAG/ Port Port Port       C/QS/S/XFP
+Id	State       State  MTU  MTU   Bndl Mode Encp Encp       MDIMDX
+--------------------------------------------------------------------------------
+1/1/1   Down  No    Down   8936 8936     - netw null xcme	GIGE-LX  10KM
+1/1/2   Down  No    Down   8936 8936     - netw null xcme	GIGE-LX  10KM
+1/1/3   Down  No    Down   8936 8936     - netw null xcme	GIGE-LX  10KM
+1/1/4   Down  No    Down   8936 8936     - netw null xcme	GIGE-LX  10KM
+1/1/5   Down  No    Down   8936 8936     - netw null xcme	GIGE-LX  10KM
+
+================================================================================
+Ports on Slot A
+================================================================================
+Port	Admin Link  Port   Cfg  Oper  LAG/ Port Port Port       C/QS/S/XFP
+Id	State       State  MTU  MTU   Bndl Mode Encp Encp       MDIMDX
+--------------------------------------------------------------------------------
+A/1	Up    Yes   Up     1514 1514     - netw null faste      MDI
+
+================================================================================
+Ports on Slot B
+================================================================================
+Port	Admin Link  Port   Cfg  Oper  LAG/ Port Port Port       C/QS/S/XFP
+Id	State       State  MTU  MTU   Bndl Mode Encp Encp       MDIMDX
+--------------------------------------------------------------------------------
+B/1	Up    Yes   Ghost  1514 1514     - netw null faste      
+================================================================================
+
+*A:7750SR_1# configure port 1/1/1
+*A:7750SR_1>config>port# info
+----------------------------------------------
+	shutdown
+	ethernet
+	exit
+----------------------------------------------
+*A:7750SR_1>config>port# no shutdown
+*A:7750SR_1>config>port# info
+----------------------------------------------
+	ethernet
+	exit
+	no shutdown
+----------------------------------------------
+*A:7750SR_1>config>port# back
+*A:7750SR_1>config# port 1/1/3
+*A:7750SR_1>config>port# no shutdown
+*A:7750SR_1>config>port# exit
+*A:7750SR_1# show port
+
+================================================================================
+Ports on Slot 1
+================================================================================
+Port	Admin Link  Port   Cfg  Oper  LAG/ Port Port Port       C/QS/S/XFP
+Id	State       State  MTU  MTU   Bndl Mode Encp Encp       MDIMDX
+--------------------------------------------------------------------------------
+1/1/1   Up    Yes   Up     8936 8936     - netw null xcme	GIGE-LX  10KM
+1/1/2   Down  No    Down   8936 8936     - netw null xcme	GIGE-LX  10KM
+1/1/3   Up    Yes   Up     8936 8936     - netw null xcme	GIGE-LX  10KM
+1/1/4   Down  No    Down   8936 8936     - netw null xcme	GIGE-LX  10KM
+1/1/5   Down  No    Down   8936 8936     - netw null xcme	GIGE-LX  10KM
+
+================================================================================
+Ports on Slot A
+================================================================================
+Port	Admin Link  Port   Cfg  Oper  LAG/ Port Port Port       C/QS/S/XFP
+Id	State       State  MTU  MTU   Bndl Mode Encp Encp       MDIMDX
+--------------------------------------------------------------------------------
+A/1	Up    Yes   Up     1514 1514     - netw null faste      MDI
+
+================================================================================
+Ports on Slot B
+================================================================================
+Port	Admin Link  Port   Cfg  Oper  LAG/ Port Port Port       C/QS/S/XFP
+Id	State       State  MTU  MTU   Bndl Mode Encp Encp       MDIMDX
+--------------------------------------------------------------------------------
+B/1	Up    Yes   Ghost  1514 1514     - netw null faste      
+================================================================================
+*A:7750SR_1#
+
+
+
+3) Configure Router Interfaces and set/verify static routes (example output from 7750)
+Note 1:  7750_SR1 needs a management IP. We are allocating 10.200.20.5/32 to 7750_SR1 within the 10.200.20.0/24 management access network.
+Note 2:  There is a second 7750_SR2 connected using a production network of 192.168.0.0/24
+Note 3:  There is a Cisco 3725 connected to 7750_SR1, but that configuration is not listed here, only the Nokia side. Please see my Cisco Dev notebook in my repo for Cisco command examples.
+
+*A:7750SR_1#show router interface
+================================================================================
+Interface Table (Router: Base)
+================================================================================
+Interface-Name			Adm		Opr(v4/v6)  Mode    Port/SapId
+   IP-Address
+--------------------------------------------------------------------------------
+system				Up		Down/--     Network system
+   -
+--------------------------------------------------------------------------------
+Interfaces : 1
+================================================================================
+*A:7750SR_1# configure router interface "system"
+*A:7750SR_1>config>router>if$ info
+-----------------------------------------------------
+	no shutdown
+-----------------------------------------------------
+*A:7750SR_1>config>router>if$ 10.200.20.5/32
+*A:7750SR_1>config>router>if$ back
+*A:7750SR_1>config>router# interface to_7753SR_2_1/1/1
+*A:7750SR_1>config>router>if$ info
+-----------------------------------------------------
+	no shutdown
+-----------------------------------------------------
+*A:7750SR_1>config>router>if$ address 192.168.0.1/24
+*A:7750SR_1>config>router>if$ info
+-----------------------------------------------------
+	address 192.68.0.1/24
+	no shutdown
+-----------------------------------------------------
+*A:7750SR_1>config>router>if$ back
+*A:7750SR_1>config>router# interface to_3725_1_1/1/3
+*A:7750SR_1>config>router>if$ address 172.16.25.2/24
+*A:7750SR_1>config>router# exit
+*A:7750SR_1# show router interface
+
+================================================================================
+Interface Table (Router: Base)
+================================================================================
+Interface-Name			Adm		Opr(v4/v6)  Mode    Port/SapId
+   IP-Address
+--------------------------------------------------------------------------------
+system				Up		Up/--       Network system
+   10.200.20.5/32						    n/a
+to_3725_1_1/1/3			Up		Down/--     Network n/a
+   172.16.25.2/24						    n/a
+to_7750_SR2_1/1/1		Up		Down/--	    Network n/a
+   192.168.0.1/24						    n/a
+--------------------------------------------------------------------------------
+Interfaces : 3
+================================================================================
+*A:7750SR_1# configure route i
+icmp-tunneling	if-attribute	igmp	interface
+ip-fast-reroute	ipv6		isis
+*A:7750SR_1# configure router interface "to_3725_1_1/1/3"
+*A:7750SR_1>config>router>if# port 1/1/3
+*A:7750SR_1>config>router>if# info
+-----------------------------------------------------
+	address 172.16.25.2/24
+	port 1/1/3
+	no shutdown
+-----------------------------------------------------
+*A:7750SR_1>config>router>if# back
+*A:7750SR_1>config>router>if# interface "to_7750SR_2_1/1/1
+*A:7750SR_1>config>router>if# port 1/1/1
+*A:7750SR_1>config>router>if# exit
+*A:7750SR_1>config>router# exit
+*A:7750SR_1# show router interface
+
+================================================================================
+Interface Table (Router: Base)
+================================================================================
+Interface-Name			Adm		Opr(v4/v6)  Mode    Port/SapId
+   IP-Address
+--------------------------------------------------------------------------------
+system				Up		Up/--       Network system
+   10.200.20.5/32						    n/a
+to_3725_1_1/1/3			Up		Up/--       Network 1/1/3
+   172.16.25.2/24						    n/a
+to_7750_SR2_1/1/1		Up		Up/--	    Network 1/1/1
+   192.168.0.1/24						    n/a
+--------------------------------------------------------------------------------
+Interfaces : 3
+================================================================================
+*A:7750SR_1# show router route-table
+
+================================================================================
+Route Table (Router: Base)
+================================================================================
+Dest Prefix[Flags]				Type	Proto	  Age	    Pref
+	Next Hop[Interface Name]
+--------------------------------------------------------------------------------
+10.200.20.5/32					Local	Local	  00h04m39s 0
+	system
+172.16.25.2/24					Local	Local	  00h01m28s 0
+	to_3725_1_1/1/3
+192.168.0.0/24					Local	Local	  00h00m59s 0
+	to_7750SR_2_1/1/1
+--------------------------------------------------------------------------------
+No. of Routes: 3
+Flags: n = Number of times nexthop is repeated
+       B = BGP backup route available
+       L = LFA nexthop available
+       S = Stick ECMP requested
+================================================================================
+*A:7750SR_1# show router static-route
+
+================================================================================
+Static Route Table (Router: Base)  Family: IPv4
+================================================================================
+Prefix					      Tag	Met	Pref  Type  Act
+  Next Hop					Interface
+No Matching Entries Found
+================================================================================
+*A:7750SR_1# configure router static-route 0.0.0.0/0 next hop 192.168.0.2
+*A:7750SR_1# show router static-route
+
+================================================================================
+Static Route Table (Router: Base)  Family: IPv4
+================================================================================
+Prefix					      Tag	Met	Pref  Type  Act
+  Next Hop					Interface
+--------------------------------------------------------------------------------
+0.0.0.0/0				      0		1	5     NH    Y
+--------------------------------------------------------------------------------
+No. of Static Routes: 1
+================================================================================
+*A:7750SR_1# show router route-table
+
+================================================================================
+Route Table (Router: Base)
+================================================================================
+Dest Prefix[Flags]				Type	Proto	  Age	    Pref
+	Next Hop[Interface Name]
+--------------------------------------------------------------------------------
+0.0.0.0/0					Remote  Static    00h00m25s 5
+	192.168.0.2						      1
+10.200.20.5/32					Local	Local	  00h04m39s 0
+	system							      0
+172.16.25.2/24					Local	Local	  00h01m28s 0
+	to_3725_1_1/1/3						      0
+192.168.0.0/24					Local	Local	  00h00m59s 0
+	to_7750SR_2_1/1/1					      0
+--------------------------------------------------------------------------------
+No. of Routes: 4
+Flags: n = Number of times nexthop is repeated
+       B = BGP backup route available
+       L = LFA nexthop available
+       S = Stick ECMP requested
+================================================================================
+
+*A:7750SR_1# ping 172.16.25.2 rapid
+PING 172.16.25.2 56 data bytes
+!!!!!
+---- 172.16.25.2 PING Statistics ----
+5 packets transmitted, 5 packets received, 0.00% loss
+round-trip min = 371ms, avg = 390ms, max = 402ms, stddev = 13.0ms
+*A:7750SR_1# admin display-config
+.... system/licensing errarata is displayed here, important info is next ....
+
+exit all
+configure
+#-------------------------------------------------------
+echo "System Configuration"
+#-------------------------------------------------------
+    system
+	name "7750SR_1"
+	dns
+	exit
+	rollback
+	    rollback-location "cf3:\config.cfg.blank
+	    rescue-location "cf3:\rollback"
+	    local-max-checkpoint 1
+	exit
+	snmp
+	exit
+	time
+	    sntp
+		shutdown
+	    exit
+	    zone UTC
+	exit
+	thresholds
+	    rmon
+	    exit
+	exit
+    exit
+#-------------------------------------------------------
+echo "System Security Configuration"
+#-------------------------------------------------------
+    system
+	security
+	    no per-peer-queing
+	    cpu-protection
+	    	link-specific-rate max
+	    	policy 254 create
+		exit
+		policy 255 create
+		exit
+	    exit
+	exit
+    exit
+#-------------------------------------------------------
+echo "Log Configuration"
+#-------------------------------------------------------
+    log
+    exit
+#-------------------------------------------------------
+echo "System Security Cpm Hw Filters and PKI Configuration"
+#-------------------------------------------------------
+    system
+	security
+	exit
+    exit
+#-------------------------------------------------------
+echo "QoS Policy Configuration"
+#-------------------------------------------------------
+    qos
+    exit
+#-------------------------------------------------------
+echo "Card Configuration"
+#-------------------------------------------------------
+    card 1
+	card-type iom3-xp-b
+	mda 1
+	    mda-type m5-1gb-sfp-b
+	    no shutdown
+	exit
+	no shutdown
+    	exit
+	no shutdown
+    exit
+#-------------------------------------------------------
+echo "Port Configuration"
+#-------------------------------------------------------
+    port 1/1/1
+	ethernet
+	exit
+	no shutdown
+    exit
+    port 1/1/2
+	shutdown
+	ethernet
+	exit
+    exit
+    port 1/1/3
+	ethernet
+	exit
+	no shutdown
+    exit
+    port 1/1/4
+	shutdown
+	ethernet
+	exit
+    exit
+    port 1/1/5
+	shutdown
+	ethernet
+	exit
+    exit
+#-------------------------------------------------------
+echo "System Sync-If-Timing Configuration"
+#-------------------------------------------------------
+    system
+	sync-if-timing
+	   begin
+	   commit
+	exit
+    exit
+#-------------------------------------------------------
+echo "Management Router Configuration"
+#-------------------------------------------------------
+    router-management
+    exit
+
+#-------------------------------------------------------
+echo "Router (Network Side) Configuration"
+#-------------------------------------------------------
+    router
+	interface "system"
+	    address 10.200.20.5/32
+	    no shutdown
+	exit
+	interace "to_3725_1_1/1/3"
+	    address 172.16.25.2/24
+	    port 1/1/3
+	    no shutdown
+	exit
+	interface "to_7750_2_1/1/1"
+	    address 192.168.0.1/24
+	    port 1/1/1
+	    no shutdown
+	exit
+    exit
+#-------------------------------------------------------
+echo "Static Route Configuration"
+#-------------------------------------------------------
+	static-route 0.0.0.0/32 next-hop 192.168.0.2
+    exit
+
+	exit
+    exit
+#-------------------------------------------------------
+echo "Service Configuration"
+#-------------------------------------------------------
+    service
+	customer 1 create
+	    description "Default customer"
+	exit
+    exit
+#-------------------------------------------------------
+echo "Router (Service Side) Configuration"
+#-------------------------------------------------------
+    router
+#-------------------------------------------------------
+echo "WLAN Gateway Configuration"
+#-------------------------------------------------------
+    exit
+
+exit all
+
+# Finished ...
+*A:7750SR_1#
